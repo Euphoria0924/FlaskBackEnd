@@ -2,7 +2,8 @@ import json
 from datetime import datetime, time
 import pandas as pd
 import pytz
-from flask import jsonify
+from flask import jsonify, request
+
 
 from data_model import Session, Task, engine
 
@@ -67,7 +68,7 @@ def create_task(task_dict):
 
 
 
-def  show_task_result(task_id):
+def  search_task_result(task_id):
     """
     根据任务 ID 查询任务结果
 
@@ -83,13 +84,53 @@ def  show_task_result(task_id):
         # 查询任务结果
         task = session.query(Task).get(task_id)
         if task:
-            result = json.loads(task.response_json)
-            result['task_id'] = task_id
-            return result
+            response_dict = json.loads(task.response_json) if task.response_json else {}
+            request_dict = json.loads(task.request_json) if task.request_json else {}
+            result = {
+                "id": task.id,
+                "status": task.status,
+                "created_at": task.created_at,
+                "updated_at": task.updated_at,
+                "lr": request_dict.get('lr', 'None'),
+                "epoch": request_dict.get('epoch', 'None'),
+                "model": request_dict.get('model', 'None'),
+                "dataset": request_dict.get('dataset', 'None'),
+                "RMSE": response_dict.get('Test RMSE', 'None')
+
+            }
+            return jsonify(result)
         else:
             return {"error": "Task not found."}
     except Exception as e:
         session.rollback()  # 回滚事务
+        raise e
+    finally:
+        session.close()
+
+
+def show_all_tasks():
+    session = Session()
+    try:
+        tasks = session.query(Task).all()
+        task_list = []
+        for task in tasks:
+            response_dict = json.loads(task.response_json) if task.response_json else {}
+            request_dict = json.loads(task.request_json) if task.request_json else {}
+            task_list.append({
+                "id": task.id,
+                "status": task.status,
+                "created_at": task.created_at,
+                "updated_at": task.updated_at,
+                "lr": request_dict.get('lr', 'None'),
+                "epoch": request_dict.get('epoch', 'None'),
+                "model": request_dict.get('model', 'None'),
+                "dataset": request_dict.get('dataset', 'None'),
+                "RMSE": response_dict.get('Test RMSE', 'None')
+
+            })
+        return jsonify(task_list)
+    except Exception as e:
+        session.rollback()
         raise e
     finally:
         session.close()

@@ -1,18 +1,11 @@
 import pickle
-from datetime import datetime
-
-import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-from google.api_core.exceptions import DataLoss
-from numpy.ma.extras import average
-from scipy.signal import savgol_filter
+
 from sklearn.preprocessing import MinMaxScaler
-from sklearn.model_selection import train_test_split
 import torch
-import torch.nn as nn
-import time
+
 import math, time
 from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error, mean_absolute_percentage_error
 from torch.utils.data import DataLoader, TensorDataset
@@ -22,7 +15,7 @@ import os
 from db_manipulate import fetch_table_as_df
 from model import LSTMAttention_ekan, LSTM
 from utils import *
-from pathlib import Path
+
 
 #形参设定
 parser = argparse.ArgumentParser()
@@ -275,11 +268,11 @@ def train(request_lr,request_epoch,request_model,request_dataset,task_id):
 
     # 创建一个包含当前模型结果的DataFrame
     data_response = {
-        "Model": [str(request_model)],  # 确保为字符串
-        "Test RMSE": [float(rmse_test)],  # 转换为 Python float
-        "Test MAE": [float(mae_test)],  # 转换为 Python float
-        "training_time": [float(training_time)],  # 转换为 Python float
-        "Test R^2": [float(r2_train)],  # 转换为 Python float
+        "Model": str(request_model),  # 确保为字符串
+        "Test RMSE": float(rmse_test),  # 转换为 Python float
+        "Test MAE": float(mae_test),  # 转换为 Python float
+        "training_time": float(training_time),  # 转换为 Python float
+        "Test R^2": float(r2_train),  # 转换为 Python float
     }
     return data_response
     # df = pd.DataFrame(data_response)

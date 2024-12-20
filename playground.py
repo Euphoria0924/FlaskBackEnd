@@ -15,6 +15,7 @@ depth_range = np.arafnge(min_depth, max_depth + 0.2, 0.2)  # 等间隔深度
 df_resampled = pd.DataFrame({"DEPTH": depth_range})
 # 将原始数据合并到新的深度范围上
 df_resampled = pd.merge(df_resampled, df, on="DEPTH", how="left")
+df_resampled = df_resampled.drop(columns=["DEPTH"])
 # 对缺失值进行插值填充（线性插值）
 df_resampled.interpolate(method="linear", inplace=True)
 # 检查填充完成后的数据
